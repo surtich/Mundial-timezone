@@ -26,9 +26,10 @@ class App extends Component {
     fetch(endpoint)
       .then(response => response.json())
       .then(({ zones }) => {
-        console.log(zones);
         this.setState({
-          zones,
+          zones: zones.sort((zoneA, zoneB) =>
+            zoneA.zoneName.localeCompare(zoneB.zoneName)
+          ),
           loading: false
         });
       })
