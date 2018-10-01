@@ -1,35 +1,41 @@
 import React, { Component } from "react";
-import { Picker, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { key } from "./secrets";
+import Clock from "./Clock";
+import Zones from "./Zones";
 
 const endpoint = `https://api.timezonedb.com/v2.1/list-time-zone?key=${key}&format=json`;
 
-const Zones = ({ zones }) => (
-  <Picker>
-    {zones.map(({ timestamp, zoneName }) => (
-      <Picker.Item key={zoneName} label={zoneName} value={zoneName} />
-    ))}
-  </Picker>
-);
+const getRealTmestamp = zone => (zone.timestamp - zone.gmtOffset) * 1000;
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: true,
-      zones: []
+      zones: [],
+      selectedZone: null
     };
   }
+
+  handleChangeZoneName = (zoneName, index) => {
+    const { zones } = this.state;
+    this.setState({
+      selectedZone: zones[index]
+    });
+  };
 
   componentDidMount() {
     fetch(endpoint)
       .then(response => response.json())
       .then(({ zones }) => {
+        const sortedZones = zones.sort((zoneA, zoneB) =>
+          zoneA.zoneName.localeCompare(zoneB.zoneName)
+        );
         this.setState({
-          zones: zones.sort((zoneA, zoneB) =>
-            zoneA.zoneName.localeCompare(zoneB.zoneName)
-          ),
+          zones: sortedZones,
+          selectedZone: sortedZones[0] || null,
           loading: false
         });
       })
@@ -37,9 +43,15 @@ class App extends Component {
   }
 
   render() {
-    const { zones, loading } = this.state;
+    const { loading, selectedZone, zones } = this.state;
+    if (loading) {
+      return <Text>loading...</Text>;
+    }
     return (
-      <View>{loading ? <Text>loading...</Text> : <Zones zones={zones} />}</View>
+      <View>
+        <Zones zones={zones} handleChangeZone={this.handleChangeZoneName} />
+        {selectedZone && <Clock timestamp={getRealTmestamp(selectedZone)} />}
+      </View>
     );
   }
 }
