@@ -9,8 +9,8 @@ const getRealTimestamp = ({ timestamp, gmtOffset, milliSeconds }) =>
 class Clock extends Component {
   constructor(props) {
     super(props);
-    this.startTime = Date.now();
     this.state = {
+      startTime: Date.now(),
       milliSeconds: 0,
       interval: null
     };
@@ -18,7 +18,7 @@ class Clock extends Component {
 
   componentDidMount() {
     const interval = setInterval(() => {
-      const { startTime } = this;
+      const { startTime } = this.state;
       this.setState({
         milliSeconds: Date.now() - startTime
       });
@@ -28,31 +28,39 @@ class Clock extends Component {
     });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { loadCounter } = this.props;
+    if (loadCounter !== prevProps.loadCounter) {
+      this.setState({
+        startTime: Date.now(),
+        milliSeconds: 0
+      });
+    }
+  }
+
   componentWillUnmount() {
     const { interval } = this.state;
     interval && clearInterval(interval);
   }
 
   render() {
-    const { gmtOffset } = this.props;
+    const { gmtOffset, timestamp } = this.props;
     const { milliSeconds } = this.state;
+    const realTimestamp = getRealTimestamp({
+      timestamp,
+      gmtOffset,
+      milliSeconds
+    });
     return (
-      <SelectedZoneContext.Consumer>
-        {({ timestamp }) => {
-          const realTimestamp = getRealTimestamp({
-            timestamp,
-            gmtOffset,
-            milliSeconds
-          });
-          return (
-            <View>
-              <Text>{new Date(realTimestamp).toLocaleTimeString()}</Text>
-            </View>
-          );
-        }}
-      </SelectedZoneContext.Consumer>
+      <View>
+        <Text>{new Date(realTimestamp).toLocaleTimeString()}</Text>
+      </View>
     );
   }
 }
 
-export default Clock;
+export default props => (
+  <SelectedZoneContext.Consumer>
+    {({ timestamp }) => <Clock {...props} timestamp={timestamp} />}
+  </SelectedZoneContext.Consumer>
+);

@@ -5,24 +5,25 @@ import { SelectedZoneContext } from "./Context";
 
 class Zones extends Component {
   render() {
-    const { zones, handleChangeZone } = this.props;
+    const { zones, selectedZone, handleChangeZone, disabled } = this.props;
     return (
-      <SelectedZoneContext.Consumer>
-        {selectedZone => (
-          <View>
-            <Picker
-              onValueChange={handleChangeZone}
-              selectedValue={selectedZone && selectedZone.zoneName}
-            >
-              {zones.map(({ timestamp, zoneName }) => (
-                <Picker.Item key={zoneName} label={zoneName} value={zoneName} />
-              ))}
-            </Picker>
-          </View>
-        )}
-      </SelectedZoneContext.Consumer>
+      <View>
+        <Picker
+          disabled={disabled}
+          onValueChange={handleChangeZone}
+          selectedValue={selectedZone && selectedZone.zoneName}
+        >
+          {zones.map(({ timestamp, zoneName }) => (
+            <Picker.Item key={zoneName} label={zoneName} value={zoneName} />
+          ))}
+        </Picker>
+      </View>
     );
   }
 }
 
-export default Zones;
+export default props => (
+  <SelectedZoneContext.Consumer>
+    {selectedZone => <Zones {...props} selectedZone={selectedZone} />}
+  </SelectedZoneContext.Consumer>
+);
