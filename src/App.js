@@ -7,8 +7,6 @@ import Zones from "./Zones";
 
 const endpoint = `https://api.timezonedb.com/v2.1/list-time-zone?key=${key}&format=json`;
 
-const getRealTmestamp = zone => (zone.timestamp - zone.gmtOffset) * 1000;
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -50,7 +48,12 @@ class App extends Component {
     return (
       <View>
         <Zones zones={zones} handleChangeZone={this.handleChangeZoneName} />
-        {selectedZone && <Clock timestamp={getRealTmestamp(selectedZone)} />}
+        {selectedZone && (
+          <Clock
+            timestamp={selectedZone.timestamp}
+            gmtOffset={selectedZone.gmtOffset}
+          />
+        )}
       </View>
     );
   }
