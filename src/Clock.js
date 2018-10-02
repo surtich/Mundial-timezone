@@ -1,50 +1,29 @@
 import React, { Component } from "react";
 import { Text, View } from "react-native";
 
-const getRealTimestamp = ({ timestamp, gmtOffset, seconds }) =>
-  (timestamp + seconds - gmtOffset) * 1000;
+const getRealTimestamp = ({ timestamp, gmtOffset, milliSeconds }) =>
+  (timestamp - gmtOffset) * 1000 + milliSeconds;
 
 class Clock extends Component {
   constructor(props) {
     super(props);
+    this.startTime = Date.now();
     this.state = {
-      timestamp: getRealTimestamp({
-        timestamp: props.timestamp,
-        gmtOffset: props.gmtOffset,
-        seconds: 0
-      }),
-      interval: null,
-      seconds: 0
+      milliSeconds: 0,
+      interval: null
     };
   }
 
   componentDidMount() {
     const interval = setInterval(() => {
-      const { seconds, timestamp } = this.state;
+      const { startTime } = this;
       this.setState({
-        timestamp: timestamp + 1000,
-        seconds: seconds + 1
+        milliSeconds: Date.now() - startTime
       });
     }, 1000);
     this.setState({
       interval
     });
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { timestamp, gmtOffset } = this.props;
-    if (
-      timestamp !== prevProps.timestamp ||
-      gmtOffset !== prevProps.gmtOffset
-    ) {
-      this.setState({
-        timestamp: getRealTimestamp({
-          timestamp,
-          gmtOffset,
-          seconds: this.state.seconds
-        })
-      });
-    }
   }
 
   componentWillUnmount() {
@@ -53,10 +32,17 @@ class Clock extends Component {
   }
 
   render() {
-    const { timestamp } = this.state;
+    const { timestamp, gmtOffset } = this.props;
+    const { milliSeconds } = this.state;
+
+    const realTimestamp = getRealTimestamp({
+      timestamp,
+      gmtOffset,
+      milliSeconds
+    });
     return (
       <View>
-        <Text>{new Date(timestamp).toLocaleTimeString()}</Text>
+        <Text>{new Date(realTimestamp).toLocaleTimeString()}</Text>
       </View>
     );
   }
