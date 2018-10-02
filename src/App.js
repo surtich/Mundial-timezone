@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Text, View } from "react-native";
 
+import { SelectedZoneContext } from "./Context";
+
 import { timezonedbKey } from "./secrets";
 import Clock from "./Clock";
 import Zones from "./Zones";
@@ -54,17 +56,10 @@ class App extends Component {
     }
     return (
       <View>
-        <Zones
-          zones={zones}
-          selectedZone={selectedZone}
-          handleChangeZone={this.handleChangeZoneName}
-        />
-        {selectedZone && (
-          <Clock
-            timestamp={selectedZone.timestamp}
-            gmtOffset={myZone.gmtOffset}
-          />
-        )}
+        <SelectedZoneContext.Provider value={selectedZone}>
+          <Zones zones={zones} handleChangeZone={this.handleChangeZoneName} />
+          {selectedZone && <Clock gmtOffset={myZone.gmtOffset} />}
+        </SelectedZoneContext.Provider>
       </View>
     );
   }

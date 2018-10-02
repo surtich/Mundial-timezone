@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Text, View } from "react-native";
 
+import { SelectedZoneContext } from "./Context";
+
 const getRealTimestamp = ({ timestamp, gmtOffset, milliSeconds }) =>
   (timestamp - gmtOffset) * 1000 + milliSeconds;
 
@@ -32,18 +34,23 @@ class Clock extends Component {
   }
 
   render() {
-    const { timestamp, gmtOffset } = this.props;
+    const { gmtOffset } = this.props;
     const { milliSeconds } = this.state;
-
-    const realTimestamp = getRealTimestamp({
-      timestamp,
-      gmtOffset,
-      milliSeconds
-    });
     return (
-      <View>
-        <Text>{new Date(realTimestamp).toLocaleTimeString()}</Text>
-      </View>
+      <SelectedZoneContext.Consumer>
+        {({ timestamp }) => {
+          const realTimestamp = getRealTimestamp({
+            timestamp,
+            gmtOffset,
+            milliSeconds
+          });
+          return (
+            <View>
+              <Text>{new Date(realTimestamp).toLocaleTimeString()}</Text>
+            </View>
+          );
+        }}
+      </SelectedZoneContext.Consumer>
     );
   }
 }
