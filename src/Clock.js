@@ -1,14 +1,18 @@
 import React, { Component } from "react";
 import { Text, View } from "react-native";
 
-const getRealTimestamp = (timestamp, gmtOffset, seconds) =>
-  (timestamp + seconds) * 1000;
+const getRealTimestamp = ({ timestamp, gmtOffset, seconds }) =>
+  (timestamp + seconds - gmtOffset) * 1000;
 
 class Clock extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      timestamp: getRealTimestamp(props.timestamp, props.gmtOffset, 0),
+      timestamp: getRealTimestamp({
+        timestamp: props.timestamp,
+        gmtOffset: props.gmtOffset,
+        seconds: 0
+      }),
       interval: null,
       seconds: 0
     };
@@ -34,7 +38,11 @@ class Clock extends Component {
       gmtOffset !== prevProps.gmtOffset
     ) {
       this.setState({
-        timestamp: getRealTimestamp(timestamp, gmtOffset, this.state.seconds)
+        timestamp: getRealTimestamp({
+          timestamp,
+          gmtOffset,
+          seconds: this.state.seconds
+        })
       });
     }
   }

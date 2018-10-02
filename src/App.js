@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import { Text, View } from "react-native";
 
-import { key } from "./secrets";
+import { timezonedbKey } from "./secrets";
 import Clock from "./Clock";
 import Zones from "./Zones";
 
-const endpoint = `https://api.timezonedb.com/v2.1/list-time-zone?key=${key}&format=json`;
+const zonesEndpoint = `https://api.timezonedb.com/v2.1/list-time-zone?key=${timezonedbKey}&format=json`;
+const myZoneEndpoint = "https://ipapi.co/json/";
 
 class App extends Component {
   constructor(props) {
@@ -13,7 +14,8 @@ class App extends Component {
     this.state = {
       loading: true,
       zones: [],
-      selectedZone: null
+      selectedZone: null,
+      myZone: null
     };
   }
 
@@ -25,15 +27,20 @@ class App extends Component {
   };
 
   componentDidMount() {
-    fetch(endpoint)
-      .then(response => response.json())
-      .then(({ zones }) => {
+    Promise.all([
+      fetch(zonesEndpoint).then(response => response.json()),
+      fetch(myZoneEndpoint).then(response => response.json())
+    ])
+      .then(([{ zones }, { timezone }]) => {
         const sortedZones = zones.sort((zoneA, zoneB) =>
           zoneA.zoneName.localeCompare(zoneB.zoneName)
         );
+        const myZone = sortedZones.find(zone => zone.zoneName === timezone);
+
         this.setState({
           zones: sortedZones,
-          selectedZone: sortedZones[0] || null,
+          selectedZone: myZone || sortedZones[0] || null,
+          myZone,
           loading: false
         });
       })
@@ -41,17 +48,21 @@ class App extends Component {
   }
 
   render() {
-    const { loading, selectedZone, zones } = this.state;
+    const { loading, myZone, selectedZone, zones } = this.state;
     if (loading) {
       return <Text>loading...</Text>;
     }
     return (
       <View>
-        <Zones zones={zones} handleChangeZone={this.handleChangeZoneName} />
+        <Zones
+          zones={zones}
+          selectedZone={selectedZone}
+          handleChangeZone={this.handleChangeZoneName}
+        />
         {selectedZone && (
           <Clock
             timestamp={selectedZone.timestamp}
-            gmtOffset={selectedZone.gmtOffset}
+            gmtOffset={myZone.gmtOffset}
           />
         )}
       </View>

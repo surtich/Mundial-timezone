@@ -1,3 +1,3 @@
-const key = "YOUR API KEY";
+const timezonedbKey = "YOUR API KEY";
 
-export { key };
+export { timezonedbKey };

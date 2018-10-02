@@ -1,3 +1,3 @@
-const key = "LPNS63G3HGY9";
+const timezonedbKey = "LPNS63G3HGY9";
 
-export { key };
+export { timezonedbKey };
