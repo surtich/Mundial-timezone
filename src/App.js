@@ -35,25 +35,26 @@ class App extends Component {
     });
   };
 
-  reload = () => {
-    Promise.all([
-      fetch(zonesEndpoint).then(response => response.json()),
-      fetch(myZoneEndpoint).then(response => response.json())
-    ])
-      .then(([{ zones }, { timezone }]) => {
-        const sortedZones = sortZones(zones);
-        const myZone = sortedZones.find(zone => zone.zoneName === timezone);
+  reload = async () => {
+    try {
+      const [{ zones }, { timezone }] = await Promise.all([
+        fetch(zonesEndpoint).then(response => response.json()),
+        fetch(myZoneEndpoint).then(response => response.json())
+      ]);
+      const sortedZones = sortZones(zones);
+      const myZone = sortedZones.find(zone => zone.zoneName === timezone);
 
-        this.setState({
-          zones: sortedZones,
-          selectedZone: myZone || sortedZones[0] || null,
-          myZone,
-          loading: false,
-          refreshing: false,
-          loadCounter: this.state.loadCounter + 1
-        });
-      })
-      .catch(err => console.log("Error", err));
+      this.setState({
+        zones: sortedZones,
+        selectedZone: myZone || sortedZones[0] || null,
+        myZone,
+        loading: false,
+        refreshing: false,
+        loadCounter: this.state.loadCounter + 1
+      });
+    } catch (err) {
+      console.log("Error in reload", err);
+    }
   };
 
   refresh = () => {
